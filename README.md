@@ -1,0 +1,1 @@
+# banquito-clearinghouse-adapter
