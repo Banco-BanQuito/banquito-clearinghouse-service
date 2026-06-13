@@ -7,10 +7,11 @@ import ec.edu.espe.banquito.banquitoclearinghouseadapter.repository.OffUsPayment
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Service
 public class OffUsConsumerService {
-    private OffUsPaymentRepository offUsPaymentRepository;
+    private final OffUsPaymentRepository offUsPaymentRepository;
 
     public OffUsConsumerService(OffUsPaymentRepository offUsPaymentRepository) {
         this.offUsPaymentRepository = offUsPaymentRepository;
@@ -27,7 +28,7 @@ public class OffUsConsumerService {
         payment.setCurrency(message.getCurrency());
         payment.setValueDate(message.getValueDate());
         payment.setStatus(PaymentStatus.RECEIVED);
-        payment.setCreatedAt(LocalDateTime.now());
+        payment.setCreatedAt(LocalDateTime.now(ZoneId.systemDefault()));
         offUsPaymentRepository.save(payment);
     }
 }

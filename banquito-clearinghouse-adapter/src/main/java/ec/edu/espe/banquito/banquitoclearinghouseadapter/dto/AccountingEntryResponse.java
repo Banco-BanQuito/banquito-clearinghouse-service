@@ -8,6 +8,16 @@ public class AccountingEntryResponse {
     private String message;
 
     public AccountingEntryResponse() {
+        // Constructor por defecto intencionalmente vacío.
+        // Motivo: frameworks de (de)serialización como Jackson requieren un constructor sin argumentos
+        // para crear instancias antes de establecer propiedades vía setters/reflection.
+    }
+
+    // Constructor con todos los campos para conveniencia al crear instancias programáticamente.
+    public AccountingEntryResponse(String entryId, String status, String message) {
+        this.entryId = entryId;
+        this.status = status;
+        this.message = message;
     }
 
     public String getEntryId() {

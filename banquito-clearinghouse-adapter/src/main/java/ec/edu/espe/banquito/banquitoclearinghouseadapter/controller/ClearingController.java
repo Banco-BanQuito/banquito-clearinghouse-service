@@ -1,7 +1,6 @@
 package ec.edu.espe.banquito.banquitoclearinghouseadapter.controller;
 
 import ec.edu.espe.banquito.banquitoclearinghouseadapter.dto.ClearingFileResponse;
-import ec.edu.espe.banquito.banquitoclearinghouseadapter.listener.ClearingQueueListener;
 import ec.edu.espe.banquito.banquitoclearinghouseadapter.service.ClearingQueryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

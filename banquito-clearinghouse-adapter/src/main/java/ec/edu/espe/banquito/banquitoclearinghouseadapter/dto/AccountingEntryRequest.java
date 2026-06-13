@@ -12,6 +12,17 @@ public class AccountingEntryRequest {
     private String reference;
 
     public AccountingEntryRequest() {
+        // Constructor por defecto intencionalmente vacío.
+        // Motivo: frameworks de (de)serialización como Jackson requieren un constructor sin argumentos
+        // para crear instancias antes de establecer propiedades vía setters/reflection.
+    }
+
+    // Constructor con todos los campos para conveniencia al crear instancias programáticamente.
+    public AccountingEntryRequest(String accountCode, BigDecimal amount, String description, String reference) {
+        this.accountCode = accountCode;
+        this.amount = amount;
+        this.description = description;
+        this.reference = reference;
     }
 
     public String getAccountCode() {
