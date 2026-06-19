@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Document(collection = "compensation_file")
+@Document(collection = "clearing_compensation_file")
 public class CompensationFile {
     @Id
     private String id;

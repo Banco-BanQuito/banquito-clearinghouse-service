@@ -1,18 +1,23 @@
 package ec.edu.espe.banquito.banquitoclearinghouseadapter.service;
 
+import ec.edu.espe.banquito.banquitoclearinghouseadapter.enums.PaymentStatus;
 import ec.edu.espe.banquito.banquitoclearinghouseadapter.exception.AccountingIntegrationException;
 import ec.edu.espe.banquito.banquitoclearinghouseadapter.exception.FileGenerationException;
 import ec.edu.espe.banquito.banquitoclearinghouseadapter.model.CompensationFile;
 import ec.edu.espe.banquito.banquitoclearinghouseadapter.model.OffUsPayment;
 import ec.edu.espe.banquito.banquitoclearinghouseadapter.repository.CompensationFileRepository;
 import ec.edu.espe.banquito.banquitoclearinghouseadapter.repository.OffUsPaymentRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,9 +29,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-
 @Service
 public class CompensationFileService {
+
+    private static final Logger log = LoggerFactory.getLogger(CompensationFileService.class);
 
     private final OffUsPaymentRepository offUsPaymentRepository;
     private final CompensationFileRepository compensationFileRepository;
@@ -89,6 +95,47 @@ public class CompensationFileService {
         }
     }
 
+    @Scheduled(fixedRate = 30000) // Runs every 30 seconds
+    public void generateSpiFile() {
+        List<OffUsPayment> pendingPayments = offUsPaymentRepository.findByStatus(PaymentStatus.RECEIVED);
+        if (pendingPayments.isEmpty()) {
+            return;
+        }
+
+        log.info("Generando archivo plano SPI para el Banco Central con {} transacciones...", pendingPayments.size());
+
+        try {
+            File dir = new File("/Users/anahy/Desktop/Arquitectura/IIParcial/Banco-BanQuito-V2/SPI_OUT");
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+
+            String filename = "SPI_BCE_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + ".csv";
+            File file = new File(dir, filename);
+
+            try (PrintWriter writer = new PrintWriter(new FileWriter(file))) {
+                writer.println("TRX_ID,ROUTING_CODE,ORIGIN_ACCOUNT,DESTINATION_ACCOUNT,AMOUNT,DATE");
+                for (OffUsPayment payment : pendingPayments) {
+                    writer.printf("%s,%s,%s,%s,%.2f,%s%n",
+                            payment.getTransactionId(),
+                            payment.getRoutingCode(),
+                            payment.getOriginAccount(),
+                            payment.getDestinationAccount(),
+                            payment.getAmount(),
+                            payment.getCreatedAt()
+                    );
+                    payment.setStatus(PaymentStatus.ACCOUNTED);
+                }
+            }
+
+            offUsPaymentRepository.saveAll(pendingPayments);
+            log.info("Archivo SPI generado exitosamente: {}", file.getAbsolutePath());
+
+        } catch (Exception e) {
+            log.error("Error generando el archivo SPI: {}", e.getMessage());
+        }
+    }
+
     private String buildFileName(UUID batchId) {
         String datePart = LocalDate.now(ZoneId.systemDefault())
                 .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
@@ -145,7 +192,7 @@ public class CompensationFileService {
         File dir = Files.createTempDirectory(
                 userBase,
                 "compensation-"
-        ).toFile();
+            ).toFile();
 
         validateWritableDirectory(
                 dir,

@@ -8,5 +8,6 @@ import java.util.UUID;
 
 public interface OffUsPaymentRepository extends MongoRepository<OffUsPayment, String> {
     List<OffUsPayment> findByBatchId(UUID batchId);
+    List<OffUsPayment> findByStatus(ec.edu.espe.banquito.banquitoclearinghouseadapter.enums.PaymentStatus status);
     Long countByBatchId(UUID batchId);
 }

@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Document(collection = "offus_payment")
+@Document(collection = "clearing_offus_payment")
 public class OffUsPayment {
     @Id
     private String id;
