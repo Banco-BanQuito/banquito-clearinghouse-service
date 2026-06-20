@@ -161,12 +161,12 @@ public class CompensationFileService {
         LocalDateTime from = date.atStartOfDay();
         LocalDateTime to = date.plusDays(1).atStartOfDay();
 
-        Optional<CompensationFile> existing = compensationFileRepository.findByFileTypeAndPeriodFrom("CONSOLIDADO", from);
-        if (existing.isPresent()) {
-            throw new FileGenerationException(
-                    "Ya existe un consolidado generado para el " + date + ". Solo se permite uno por día."
-            );
-        }
+        // El consolidado es UNO por día, pero se puede regenerar varias veces durante el día
+        // para reflejar movimientos nuevos: cada regeneración sobrescribe el mismo registro
+        // (mismo archivo en disco) en vez de crear uno aparte.
+        CompensationFile file = compensationFileRepository
+                .findByFileTypeAndPeriodFrom("CONSOLIDADO", from)
+                .orElseGet(CompensationFile::new);
 
         List<OffUsPayment> payments = offUsPaymentRepository.findByCreatedAtBetween(from, to);
         if (payments.isEmpty()) {
@@ -175,7 +175,7 @@ public class CompensationFileService {
             );
         }
 
-        log.info("Generando archivo consolidado del Banco Central para {} con {} transacciones...",
+        log.info("Generando/actualizando archivo consolidado del Banco Central para {} con {} transacciones...",
                 date, payments.size());
 
         try {
@@ -198,8 +198,9 @@ public class CompensationFileService {
                     .filter(Objects::nonNull)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-            CompensationFile file = new CompensationFile();
-            file.setBatchId(UUID.randomUUID());
+            if (file.getBatchId() == null) {
+                file.setBatchId(UUID.randomUUID());
+            }
             file.setFileName(csvFile.getName());
             file.setFilePath(csvFile.getAbsolutePath());
             file.setTxtFilePath(txtFile.getAbsolutePath());
