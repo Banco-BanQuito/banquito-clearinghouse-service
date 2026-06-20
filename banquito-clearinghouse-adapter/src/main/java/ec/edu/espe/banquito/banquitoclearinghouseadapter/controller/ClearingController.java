@@ -1,6 +1,8 @@
 package ec.edu.espe.banquito.banquitoclearinghouseadapter.controller;
 
 import ec.edu.espe.banquito.banquitoclearinghouseadapter.dto.ClearingFileResponse;
+import ec.edu.espe.banquito.banquitoclearinghouseadapter.dto.CompensationFileResponse;
+import ec.edu.espe.banquito.banquitoclearinghouseadapter.mapper.CompensationFileMapper;
 import ec.edu.espe.banquito.banquitoclearinghouseadapter.model.CompensationFile;
 import ec.edu.espe.banquito.banquitoclearinghouseadapter.repository.CompensationFileRepository;
 import ec.edu.espe.banquito.banquitoclearinghouseadapter.service.ClearingQueryService;
@@ -43,10 +45,10 @@ public class ClearingController {
     }
 
     @PostMapping("/files/consolidate")
-    public ResponseEntity<CompensationFile> consolidate(
+    public ResponseEntity<CompensationFileResponse> consolidate(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         CompensationFile file = compensationFileService.generateConsolidatedFile(date != null ? date : LocalDate.now());
-        return ResponseEntity.ok(file);
+        return ResponseEntity.ok(CompensationFileMapper.toResponse(file));
     }
 
     @GetMapping("/batches/{batchId}/file")
@@ -55,9 +57,10 @@ public class ClearingController {
     }
 
     @GetMapping("/files")
-    public List<CompensationFile> listFiles() {
+    public List<CompensationFileResponse> listFiles() {
         return compensationFileRepository.findAll().stream()
                 .sorted(Comparator.comparing(CompensationFile::getGeneratedAt).reversed())
+                .map(CompensationFileMapper::toResponse)
                 .toList();
     }
 
