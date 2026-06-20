@@ -105,7 +105,7 @@ public class CompensationFileService {
         log.info("Generando archivo plano SPI para el Banco Central con {} transacciones...", pendingPayments.size());
 
         try {
-            File dir = new File("/Users/anahy/Desktop/Arquitectura/IIParcial/Banco-BanQuito-V2/SPI_OUT");
+            File dir = resolveOutputDirectory();
             if (!dir.exists()) {
                 dir.mkdirs();
             }
