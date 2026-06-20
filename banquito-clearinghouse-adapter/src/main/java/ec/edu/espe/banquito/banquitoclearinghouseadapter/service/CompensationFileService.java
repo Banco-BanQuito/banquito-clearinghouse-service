@@ -163,10 +163,16 @@ public class CompensationFileService {
 
         // El consolidado es UNO por día, pero se puede regenerar varias veces durante el día
         // para reflejar movimientos nuevos: cada regeneración sobrescribe el mismo registro
-        // (mismo archivo en disco) en vez de crear uno aparte.
-        CompensationFile file = compensationFileRepository
-                .findByFileTypeAndPeriodFrom("CONSOLIDADO", from)
+        // (mismo archivo en disco) en vez de crear uno aparte. Si quedaron duplicados de
+        // pruebas anteriores, se conserva el más reciente y se eliminan los demás.
+        List<CompensationFile> existingForDay = compensationFileRepository
+                .findAllByFileTypeAndPeriodFrom("CONSOLIDADO", from);
+        CompensationFile file = existingForDay.stream()
+                .max(java.util.Comparator.comparing(CompensationFile::getGeneratedAt))
                 .orElseGet(CompensationFile::new);
+        existingForDay.stream()
+                .filter(f -> !f.getId().equals(file.getId()))
+                .forEach(compensationFileRepository::delete);
 
         List<OffUsPayment> payments = offUsPaymentRepository.findByCreatedAtBetween(from, to);
         if (payments.isEmpty()) {
