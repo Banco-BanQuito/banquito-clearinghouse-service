@@ -4,19 +4,24 @@ import ec.edu.espe.banquito.banquitoclearinghouseadapter.dto.ClearingFileRespons
 import ec.edu.espe.banquito.banquitoclearinghouseadapter.model.CompensationFile;
 import ec.edu.espe.banquito.banquitoclearinghouseadapter.repository.CompensationFileRepository;
 import ec.edu.espe.banquito.banquitoclearinghouseadapter.service.ClearingQueryService;
+import ec.edu.espe.banquito.banquitoclearinghouseadapter.service.CompensationFileService;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 
 import java.io.File;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.Comparator;
@@ -27,11 +32,21 @@ import java.util.Comparator;
 public class ClearingController {
     private final ClearingQueryService clearingQueryService;
     private final CompensationFileRepository compensationFileRepository;
+    private final CompensationFileService compensationFileService;
 
     public ClearingController(ClearingQueryService clearingQueryService,
-                              CompensationFileRepository compensationFileRepository) {
+                              CompensationFileRepository compensationFileRepository,
+                              CompensationFileService compensationFileService) {
         this.clearingQueryService = clearingQueryService;
         this.compensationFileRepository = compensationFileRepository;
+        this.compensationFileService = compensationFileService;
+    }
+
+    @PostMapping("/files/consolidate")
+    public ResponseEntity<CompensationFile> consolidate(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        CompensationFile file = compensationFileService.generateConsolidatedFile(date != null ? date : LocalDate.now());
+        return ResponseEntity.ok(file);
     }
 
     @GetMapping("/batches/{batchId}/file")

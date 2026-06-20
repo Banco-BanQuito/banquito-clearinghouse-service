@@ -31,6 +31,12 @@ public class CompensationFile {
 
     private LocalDateTime generatedAt;
 
+    private String fileType;
+
+    private LocalDateTime periodFrom;
+
+    private LocalDateTime periodTo;
+
     public String getId() {
         return id;
     }
@@ -109,5 +115,29 @@ public class CompensationFile {
 
     public void setGeneratedAt(LocalDateTime generatedAt) {
         this.generatedAt = generatedAt;
+    }
+
+    public String getFileType() {
+        return fileType;
+    }
+
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
+    }
+
+    public LocalDateTime getPeriodFrom() {
+        return periodFrom;
+    }
+
+    public void setPeriodFrom(LocalDateTime periodFrom) {
+        this.periodFrom = periodFrom;
+    }
+
+    public LocalDateTime getPeriodTo() {
+        return periodTo;
+    }
+
+    public void setPeriodTo(LocalDateTime periodTo) {
+        this.periodTo = periodTo;
     }
 }

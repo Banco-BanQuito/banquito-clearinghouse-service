@@ -135,6 +135,7 @@ public class CompensationFileService {
             file.setTotalAmount(total);
             file.setStatus(ec.edu.espe.banquito.banquitoclearinghouseadapter.enums.FileStatus.GENERATED);
             file.setGeneratedAt(LocalDateTime.now(ZoneId.systemDefault()));
+            file.setFileType("CICLO");
             compensationFileRepository.save(file);
 
             for (OffUsPayment payment : pendingPayments) {
@@ -147,6 +148,71 @@ public class CompensationFileService {
 
         } catch (Exception e) {
             log.error("Error generando el archivo SPI: {}", e.getMessage());
+        }
+    }
+
+    @Scheduled(cron = "${compensation.consolidation.cron:0 0 20 * * *}")
+    public void generateScheduledConsolidatedFile() {
+        generateConsolidatedFile(LocalDate.now(ZoneId.systemDefault()));
+    }
+
+    public CompensationFile generateConsolidatedFile(LocalDate date) {
+        LocalDateTime from = date.atStartOfDay();
+        LocalDateTime to = date.plusDays(1).atStartOfDay();
+
+        List<OffUsPayment> payments = offUsPaymentRepository.findByCreatedAtBetween(from, to);
+        if (payments.isEmpty()) {
+            throw new FileGenerationException(
+                    "No hay movimientos interbancarios registrados el " + date
+            );
+        }
+
+        log.info("Generando archivo consolidado del Banco Central para {} con {} transacciones...",
+                date, payments.size());
+
+        try {
+            File dir = resolveOutputDirectory();
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+
+            String datePart = date.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+            File csvFile = new File(dir, "CONSOLIDADO_BCE_" + datePart + ".csv");
+            File txtFile = new File(dir, "CONSOLIDADO_BCE_" + datePart + ".txt");
+            File pdfFile = new File(dir, "CONSOLIDADO_BCE_" + datePart + ".pdf");
+
+            writeSpiCsv(csvFile, payments);
+            writeSpiTxt(txtFile, payments);
+            writeSpiPdf(pdfFile, payments, "Consolidado " + datePart);
+
+            BigDecimal total = payments.stream()
+                    .map(OffUsPayment::getAmount)
+                    .filter(Objects::nonNull)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            CompensationFile file = new CompensationFile();
+            file.setBatchId(UUID.randomUUID());
+            file.setFileName(csvFile.getName());
+            file.setFilePath(csvFile.getAbsolutePath());
+            file.setTxtFilePath(txtFile.getAbsolutePath());
+            file.setPdfFilePath(pdfFile.getAbsolutePath());
+            file.setOffUsRecords(payments.size());
+            file.setTotalAmount(total);
+            file.setStatus(ec.edu.espe.banquito.banquitoclearinghouseadapter.enums.FileStatus.GENERATED);
+            file.setGeneratedAt(LocalDateTime.now(ZoneId.systemDefault()));
+            file.setFileType("CONSOLIDADO");
+            file.setPeriodFrom(from);
+            file.setPeriodTo(to);
+            compensationFileRepository.save(file);
+
+            log.info("Archivo consolidado generado exitosamente: {} / {} / {}",
+                    csvFile.getName(), txtFile.getName(), pdfFile.getName());
+
+            return file;
+        } catch (Exception e) {
+            throw new FileGenerationException(
+                    "No se pudo generar el archivo consolidado: " + e.getMessage(), e
+            );
         }
     }
 
@@ -332,6 +398,7 @@ public class CompensationFileService {
                 ec.edu.espe.banquito.banquitoclearinghouseadapter.enums.FileStatus.GENERATED
         );
         file.setGeneratedAt(LocalDateTime.now(ZoneId.systemDefault()));
+        file.setFileType("LOTE");
 
         return file;
     }
