@@ -270,7 +270,7 @@ public class CompensationFileService {
 
     private void writeSpiPdf(File file, List<OffUsPayment> payments, String timestamp) throws java.io.FileNotFoundException, com.lowagie.text.DocumentException {
         com.lowagie.text.Document document = new com.lowagie.text.Document(com.lowagie.text.PageSize.A4.rotate());
-        try {
+        try (AutoCloseable closer = () -> { if (document.isOpen()) document.close(); }) {
             com.lowagie.text.pdf.PdfWriter.getInstance(document, new java.io.FileOutputStream(file));
             document.open();
 
@@ -299,10 +299,10 @@ public class CompensationFileService {
                 table.addCell(new com.lowagie.text.Phrase(String.valueOf(payment.getCreatedAt()), rowFont));
             }
             document.add(table);
-        } finally {
-            if (document.isOpen()) {
-                document.close();
-            }
+        } catch (java.io.FileNotFoundException | com.lowagie.text.DocumentException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new com.lowagie.text.DocumentException(e);
         }
     }
 
