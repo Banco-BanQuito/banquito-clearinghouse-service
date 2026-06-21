@@ -37,7 +37,7 @@ class ClearingQueryServiceTest {
     @Test
     void findByBatchId_debeRetornarResponse_cuandoArchivoExiste() {
         UUID batchId = UUID.randomUUID();
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.of(2026, 6, 12, 10, 0, 0);
 
         CompensationFile file = new CompensationFile();
         file.setBatchId(batchId);

@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,7 +41,7 @@ class OffUsConsumerServiceTest {
         message.setDestinationAccount("0009876543");
         message.setAmount(new BigDecimal("100.00"));
         message.setCurrency("USD");
-        message.setValueDate(LocalDate.of(2026, 6, 12));
+        message.setValueDate(LocalDate.of(2026, Month.JUNE, 12));
 
         offUsConsumerService.process(message);
 

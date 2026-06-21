@@ -12,7 +12,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,7 +29,6 @@ import java.util.Comparator;
 
 @RestController
 @RequestMapping("/api/v2/clearing")
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class ClearingController {
     private final ClearingQueryService clearingQueryService;
     private final CompensationFileRepository compensationFileRepository;

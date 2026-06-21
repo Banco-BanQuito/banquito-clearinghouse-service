@@ -27,13 +27,14 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
 public class CompensationFileService {
 
     private static final Logger log = LoggerFactory.getLogger(CompensationFileService.class);
+    private static final String SPI_FILE_PREFIX = "SPI_BCE_";
+    private static final String CONSOLIDADO_FILE_PREFIX = "CONSOLIDADO_BCE_";
 
     private final OffUsPaymentRepository offUsPaymentRepository;
     private final CompensationFileRepository compensationFileRepository;
@@ -111,10 +112,10 @@ public class CompensationFileService {
                 dir.mkdirs();
             }
 
-            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-            File csvFile = new File(dir, "SPI_BCE_" + timestamp + ".csv");
-            File txtFile = new File(dir, "SPI_BCE_" + timestamp + ".txt");
-            File pdfFile = new File(dir, "SPI_BCE_" + timestamp + ".pdf");
+            String timestamp = LocalDateTime.now(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+            File csvFile = new File(dir, SPI_FILE_PREFIX + timestamp + ".csv");
+            File txtFile = new File(dir, SPI_FILE_PREFIX + timestamp + ".txt");
+            File pdfFile = new File(dir, SPI_FILE_PREFIX + timestamp + ".pdf");
 
             writeSpiCsv(csvFile, pendingPayments);
             writeSpiTxt(txtFile, pendingPayments);
@@ -191,9 +192,9 @@ public class CompensationFileService {
             }
 
             String datePart = date.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-            File csvFile = new File(dir, "CONSOLIDADO_BCE_" + datePart + ".csv");
-            File txtFile = new File(dir, "CONSOLIDADO_BCE_" + datePart + ".txt");
-            File pdfFile = new File(dir, "CONSOLIDADO_BCE_" + datePart + ".pdf");
+            File csvFile = new File(dir, CONSOLIDADO_FILE_PREFIX + datePart + ".csv");
+            File txtFile = new File(dir, CONSOLIDADO_FILE_PREFIX + datePart + ".txt");
+            File pdfFile = new File(dir, CONSOLIDADO_FILE_PREFIX + datePart + ".pdf");
 
             writeSpiCsv(csvFile, payments);
             writeSpiTxt(txtFile, payments);
@@ -268,35 +269,40 @@ public class CompensationFileService {
 
     private void writeSpiPdf(File file, List<OffUsPayment> payments, String timestamp) throws java.io.FileNotFoundException, com.lowagie.text.DocumentException {
         com.lowagie.text.Document document = new com.lowagie.text.Document(com.lowagie.text.PageSize.A4.rotate());
-        com.lowagie.text.pdf.PdfWriter.getInstance(document, new java.io.FileOutputStream(file));
-        document.open();
+        try {
+            com.lowagie.text.pdf.PdfWriter.getInstance(document, new java.io.FileOutputStream(file));
+            document.open();
 
-        com.lowagie.text.Font titleFont = com.lowagie.text.FontFactory.getFont(com.lowagie.text.FontFactory.HELVETICA_BOLD, 16);
-        com.lowagie.text.Font headerFont = com.lowagie.text.FontFactory.getFont(com.lowagie.text.FontFactory.HELVETICA_BOLD, 9, java.awt.Color.WHITE);
-        com.lowagie.text.Font rowFont = com.lowagie.text.FontFactory.getFont(com.lowagie.text.FontFactory.HELVETICA, 9);
+            com.lowagie.text.Font titleFont = com.lowagie.text.FontFactory.getFont(com.lowagie.text.FontFactory.HELVETICA_BOLD, 16);
+            com.lowagie.text.Font headerFont = com.lowagie.text.FontFactory.getFont(com.lowagie.text.FontFactory.HELVETICA_BOLD, 9, java.awt.Color.WHITE);
+            com.lowagie.text.Font rowFont = com.lowagie.text.FontFactory.getFont(com.lowagie.text.FontFactory.HELVETICA, 9);
 
-        com.lowagie.text.Paragraph title = new com.lowagie.text.Paragraph("Archivo SPI — Banco Central (Ciclo " + timestamp + ")", titleFont);
-        title.setSpacingAfter(12);
-        document.add(title);
+            com.lowagie.text.Paragraph title = new com.lowagie.text.Paragraph("Archivo SPI — Banco Central (Ciclo " + timestamp + ")", titleFont);
+            title.setSpacingAfter(12);
+            document.add(title);
 
-        com.lowagie.text.pdf.PdfPTable table = new com.lowagie.text.pdf.PdfPTable(6);
-        table.setWidthPercentage(100);
-        for (String h : new String[]{"TRX ID", "Routing", "Cuenta origen", "Cuenta destino", "Monto", "Fecha"}) {
-            com.lowagie.text.pdf.PdfPCell cell = new com.lowagie.text.pdf.PdfPCell(new com.lowagie.text.Phrase(h, headerFont));
-            cell.setBackgroundColor(new java.awt.Color(30, 58, 138));
-            cell.setPadding(5);
-            table.addCell(cell);
+            com.lowagie.text.pdf.PdfPTable table = new com.lowagie.text.pdf.PdfPTable(6);
+            table.setWidthPercentage(100);
+            for (String h : new String[]{"TRX ID", "Routing", "Cuenta origen", "Cuenta destino", "Monto", "Fecha"}) {
+                com.lowagie.text.pdf.PdfPCell cell = new com.lowagie.text.pdf.PdfPCell(new com.lowagie.text.Phrase(h, headerFont));
+                cell.setBackgroundColor(new java.awt.Color(30, 58, 138));
+                cell.setPadding(5);
+                table.addCell(cell);
+            }
+            for (OffUsPayment payment : payments) {
+                table.addCell(new com.lowagie.text.Phrase(String.valueOf(payment.getTransactionId()), rowFont));
+                table.addCell(new com.lowagie.text.Phrase(String.valueOf(payment.getRoutingCode()), rowFont));
+                table.addCell(new com.lowagie.text.Phrase(String.valueOf(payment.getOriginAccount()), rowFont));
+                table.addCell(new com.lowagie.text.Phrase(String.valueOf(payment.getDestinationAccount()), rowFont));
+                table.addCell(new com.lowagie.text.Phrase("$" + payment.getAmount(), rowFont));
+                table.addCell(new com.lowagie.text.Phrase(String.valueOf(payment.getCreatedAt()), rowFont));
+            }
+            document.add(table);
+        } finally {
+            if (document.isOpen()) {
+                document.close();
+            }
         }
-        for (OffUsPayment payment : payments) {
-            table.addCell(new com.lowagie.text.Phrase(String.valueOf(payment.getTransactionId()), rowFont));
-            table.addCell(new com.lowagie.text.Phrase(String.valueOf(payment.getRoutingCode()), rowFont));
-            table.addCell(new com.lowagie.text.Phrase(String.valueOf(payment.getOriginAccount()), rowFont));
-            table.addCell(new com.lowagie.text.Phrase(String.valueOf(payment.getDestinationAccount()), rowFont));
-            table.addCell(new com.lowagie.text.Phrase("$" + payment.getAmount(), rowFont));
-            table.addCell(new com.lowagie.text.Phrase(String.valueOf(payment.getCreatedAt()), rowFont));
-        }
-        document.add(table);
-        document.close();
     }
 
     private String buildFileName(UUID batchId) {
