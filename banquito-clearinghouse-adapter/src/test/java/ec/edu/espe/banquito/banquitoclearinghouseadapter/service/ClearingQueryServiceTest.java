@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -37,7 +38,7 @@ class ClearingQueryServiceTest {
     @Test
     void findByBatchId_debeRetornarResponse_cuandoArchivoExiste() {
         UUID batchId = UUID.randomUUID();
-        LocalDateTime now = LocalDateTime.of(2026, 6, 12, 10, 0, 0);
+        LocalDateTime now = LocalDateTime.of(2026, Month.JUNE, 12, 10, 0, 0);
 
         CompensationFile file = new CompensationFile();
         file.setBatchId(batchId);

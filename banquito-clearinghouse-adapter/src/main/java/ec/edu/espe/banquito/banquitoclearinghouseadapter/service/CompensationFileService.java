@@ -112,7 +112,7 @@ public class CompensationFileService {
                 dir.mkdirs();
             }
 
-            String timestamp = LocalDateTime.now(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+            String timestamp = LocalDateTime.now(ZoneId.of("America/Guayaquil")).format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
             File csvFile = new File(dir, SPI_FILE_PREFIX + timestamp + ".csv");
             File txtFile = new File(dir, SPI_FILE_PREFIX + timestamp + ".txt");
             File pdfFile = new File(dir, SPI_FILE_PREFIX + timestamp + ".pdf");
@@ -136,7 +136,7 @@ public class CompensationFileService {
             file.setOffUsRecords(pendingPayments.size());
             file.setTotalAmount(total);
             file.setStatus(ec.edu.espe.banquito.banquitoclearinghouseadapter.enums.FileStatus.GENERATED);
-            file.setGeneratedAt(LocalDateTime.now(ZoneId.systemDefault()));
+            file.setGeneratedAt(LocalDateTime.now(ZoneId.of("America/Guayaquil")));
             file.setFileType("CICLO");
             compensationFileRepository.save(file);
 
@@ -155,7 +155,7 @@ public class CompensationFileService {
 
     @Scheduled(cron = "${compensation.consolidation.cron:0 0 20 * * *}")
     public void generateScheduledConsolidatedFile() {
-        generateConsolidatedFile(LocalDate.now(ZoneId.systemDefault()));
+        generateConsolidatedFile(LocalDate.now(ZoneId.of("America/Guayaquil")));
     }
 
     public CompensationFile generateConsolidatedFile(LocalDate date) {
@@ -215,7 +215,7 @@ public class CompensationFileService {
             file.setOffUsRecords(payments.size());
             file.setTotalAmount(total);
             file.setStatus(ec.edu.espe.banquito.banquitoclearinghouseadapter.enums.FileStatus.GENERATED);
-            file.setGeneratedAt(LocalDateTime.now(ZoneId.systemDefault()));
+            file.setGeneratedAt(LocalDateTime.now(ZoneId.of("America/Guayaquil")));
             file.setFileType("CONSOLIDADO");
             file.setPeriodFrom(from);
             file.setPeriodTo(to);
@@ -306,7 +306,7 @@ public class CompensationFileService {
     }
 
     private String buildFileName(UUID batchId) {
-        String datePart = LocalDate.now(ZoneId.systemDefault())
+        String datePart = LocalDate.now(ZoneId.of("America/Guayaquil"))
                 .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
         return String.format(
@@ -418,7 +418,7 @@ public class CompensationFileService {
         file.setStatus(
                 ec.edu.espe.banquito.banquitoclearinghouseadapter.enums.FileStatus.GENERATED
         );
-        file.setGeneratedAt(LocalDateTime.now(ZoneId.systemDefault()));
+        file.setGeneratedAt(LocalDateTime.now(ZoneId.of("America/Guayaquil")));
         file.setFileType("LOTE");
 
         return file;

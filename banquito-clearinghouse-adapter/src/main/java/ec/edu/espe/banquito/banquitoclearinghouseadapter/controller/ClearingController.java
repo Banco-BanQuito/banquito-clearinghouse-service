@@ -23,6 +23,7 @@ import org.springframework.http.HttpStatus;
 
 import java.io.File;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 import java.util.Comparator;
@@ -30,6 +31,8 @@ import java.util.Comparator;
 @RestController
 @RequestMapping("/api/v2/clearing")
 public class ClearingController {
+    private static final ZoneId APP_ZONE = ZoneId.of("America/Guayaquil");
+
     private final ClearingQueryService clearingQueryService;
     private final CompensationFileRepository compensationFileRepository;
     private final CompensationFileService compensationFileService;
