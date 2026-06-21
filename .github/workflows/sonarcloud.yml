@@ -10,6 +10,25 @@ jobs:
   sonarcloud:
     name: SonarCloud Scan
     runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo:8.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand(\"ping\")' --quiet"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      rabbitmq:
+        image: rabbitmq:3.13-alpine
+        ports:
+          - 5672:5672
+        options: >-
+          --health-cmd "rabbitmq-diagnostics check_port_connectivity"
+          --health-interval 15s
+          --health-timeout 10s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
         with:
@@ -42,7 +61,6 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: >
           mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
-          -DskipTests=true
           -Dsonar.projectKey=Banco-BanQuito_banquito-clearinghouse-adapter
           -Dsonar.organization=banco-banquito
           -Dsonar.host.url=https://sonarcloud.io
