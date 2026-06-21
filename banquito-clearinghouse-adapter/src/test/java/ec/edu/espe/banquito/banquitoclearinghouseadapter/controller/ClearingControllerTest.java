@@ -17,6 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -45,7 +46,7 @@ class ClearingControllerTest {
 
     @Test
     void consolidate_debeUsarFechaProvista_cuandoSeEnviaParametro() {
-        LocalDate date = LocalDate.of(2026, 6, 20);
+        LocalDate date = LocalDate.of(2026, Month.JUNE, 20);
         CompensationFile file = buildFile();
         when(compensationFileService.generateConsolidatedFile(date)).thenReturn(file);
 
@@ -81,9 +82,9 @@ class ClearingControllerTest {
     @Test
     void listFiles_debeRetornarListaOrdenadaPorFechaDescendente() {
         CompensationFile older = buildFile();
-        older.setGeneratedAt(LocalDateTime.of(2026, 6, 1, 0, 0));
+        older.setGeneratedAt(LocalDateTime.of(2026, Month.JUNE, 1, 0, 0));
         CompensationFile newer = buildFile();
-        newer.setGeneratedAt(LocalDateTime.of(2026, 6, 20, 0, 0));
+        newer.setGeneratedAt(LocalDateTime.of(2026, Month.JUNE, 20, 0, 0));
         when(compensationFileRepository.findAll()).thenReturn(List.of(older, newer));
 
         List<CompensationFileResponse> result = clearingController.listFiles();

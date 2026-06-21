@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.io.File;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -51,7 +52,7 @@ class CompensationFileServiceTest {
 
     @Test
     void generateConsolidatedFile_debeGenerarCsvTxtYPdf_conZonaHorariaDeEcuador() {
-        LocalDate date = LocalDate.of(2026, 6, 20);
+        LocalDate date = LocalDate.of(2026, Month.JUNE, 20);
         OffUsPayment payment = buildPayment();
         when(compensationFileRepository.findAllByFileTypeAndPeriodFrom(anyString(), any()))
                 .thenReturn(Collections.emptyList());
@@ -70,7 +71,7 @@ class CompensationFileServiceTest {
 
     @Test
     void generateConsolidatedFile_debeLanzarExcepcion_cuandoNoHayMovimientos() {
-        LocalDate date = LocalDate.of(2026, 6, 20);
+        LocalDate date = LocalDate.of(2026, Month.JUNE, 20);
         when(compensationFileRepository.findAllByFileTypeAndPeriodFrom(anyString(), any()))
                 .thenReturn(Collections.emptyList());
         when(offUsPaymentRepository.findByCreatedAtBetween(any(), any())).thenReturn(Collections.emptyList());
@@ -81,7 +82,7 @@ class CompensationFileServiceTest {
 
     @Test
     void generateConsolidatedFile_debeSobrescribirRegistroExistente_enVezDeCrearUnoNuevo() {
-        LocalDate date = LocalDate.of(2026, 6, 20);
+        LocalDate date = LocalDate.of(2026, Month.JUNE, 20);
         CompensationFile existing = new CompensationFile();
         existing.setId("existing-id");
         existing.setBatchId(UUID.randomUUID());
@@ -134,8 +135,8 @@ class CompensationFileServiceTest {
         payment.setDestinationAccount("0987654321");
         payment.setAmount(new BigDecimal("150.50"));
         payment.setCurrency("USD");
-        payment.setValueDate(LocalDate.of(2026, 6, 20));
-        payment.setCreatedAt(LocalDateTime.of(2026, 6, 20, 10, 0));
+        payment.setValueDate(LocalDate.of(2026, Month.JUNE, 20));
+        payment.setCreatedAt(LocalDateTime.of(2026, Month.JUNE, 20, 10, 0));
         return payment;
     }
 }
