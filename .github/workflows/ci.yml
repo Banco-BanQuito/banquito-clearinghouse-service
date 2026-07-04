@@ -10,7 +10,7 @@ env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   REGION: us-central1
   REPO: banquito-repo
-  SERVICE: clearinghouse-adapter
+  SERVICE: clearinghouse-service
   PORT: 8087
 
 jobs:
@@ -47,7 +47,7 @@ jobs:
           cache: maven
 
       - name: Run tests
-        working-directory: banquito-clearinghouse-adapter
+        working-directory: banquito-clearinghouse-service
         run: mvn test -q
 
   docker-deploy:
@@ -72,7 +72,7 @@ jobs:
         run: |
           gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
           docker build \
-            -f Dockerfile banquito-clearinghouse-adapter/ \
+            -f Dockerfile banquito-clearinghouse-service/ \
             -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ env.SERVICE }}:${{ github.sha }} \
             -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ env.SERVICE }}:latest
           docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ env.SERVICE }}:${{ github.sha }}

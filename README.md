@@ -1,8 +1,8 @@
-# banquito-clearinghouse-adapter
+# banquito-clearinghouse-service
 
 ## Descripción General
 
-**banquito-clearinghouse-adapter** es el microservicio responsable de gestionar las transacciones **Off-Us** (pagos dirigidos a entidades financieras distintas de BanQuito) dentro del Switch de Pagos Masivos BanQuito V2.
+**banquito-clearinghouse-service** es el microservicio responsable de gestionar las transacciones **Off-Us** (pagos dirigidos a entidades financieras distintas de BanQuito) dentro del Switch de Pagos Masivos BanQuito V2.
 
 Su principal responsabilidad es recibir las transacciones Off-Us enviadas por el **routing-service**, generar el archivo de compensación bancaria que será utilizado para el proceso de intercambio interbancario, registrar el asiento contable correspondiente mediante el Core Bancario y exponer servicios de consulta sobre los archivos generados.
 
@@ -49,7 +49,7 @@ routing-service
    └────────────── Off-Us ─────────────► clearing.outbound.queue
                                              │
                                              ▼
-                              banquito-clearinghouse-adapter
+                              banquito-clearinghouse-service
                                              │
                         ┌────────────────────┴───────────────────┐
                         │                                        │
@@ -139,7 +139,7 @@ src/main/java
 │   ├── AccountingException
 │   └── GlobalExceptionHandler
 │
-└── BanquitoClearinghouseAdapterApplication
+└── BanquitoClearinghouseServiceApplication
 ```
 
 ---
@@ -325,7 +325,7 @@ GET /api/v2/clearing/batches/{batchId}/file
 ## application.properties
 
 ```properties
-spring.application.name=banquito-clearinghouse-adapter
+spring.application.name=banquito-clearinghouse-service
 
 server.port=8087
 
@@ -375,7 +375,7 @@ mvn spring-boot:run
 o
 
 ```bash
-java -jar target/banquito-clearinghouse-adapter.jar
+java -jar target/banquito-clearinghouse-service.jar
 ```
 
 ---

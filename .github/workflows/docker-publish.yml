@@ -25,7 +25,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: ./banquito-clearinghouse-adapter
+          context: ./banquito-clearinghouse-service
           file: ./Dockerfile
           push: true
-          tags: ghcr.io/banco-banquito/clearinghouse-adapter:latest
+          tags: ghcr.io/banco-banquito/clearinghouse-service:latest
