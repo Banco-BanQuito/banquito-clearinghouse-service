@@ -55,12 +55,12 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
 
       - name: Build and analyze
-        working-directory: banquito-clearinghouse-adapter
+        working-directory: banquito-clearinghouse-service
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: >
           mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
-          -Dsonar.projectKey=Banco-BanQuito_banquito-clearinghouse-adapter
+          -Dsonar.projectKey=Banco-BanQuito_banquito-clearinghouse-service
           -Dsonar.organization=banco-banquito
           -Dsonar.host.url=https://sonarcloud.io
