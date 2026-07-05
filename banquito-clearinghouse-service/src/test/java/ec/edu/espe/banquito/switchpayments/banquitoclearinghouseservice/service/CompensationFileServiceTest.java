@@ -37,7 +37,7 @@ class CompensationFileServiceTest {
     private CompensationFileRepository compensationFileRepository;
 
     @Mock
-    private AccountingService accountingService;
+    private CoreSettlementService coreSettlementService;
 
     private CompensationFileService compensationFileService;
     private File tempDir;
@@ -47,7 +47,7 @@ class CompensationFileServiceTest {
         tempDir = new File(System.getProperty("java.io.tmpdir"), "clearing-test-" + UUID.randomUUID());
         tempDir.mkdirs();
         compensationFileService = new CompensationFileService(
-                offUsPaymentRepository, compensationFileRepository, accountingService, tempDir.getAbsolutePath());
+                offUsPaymentRepository, compensationFileRepository, coreSettlementService, tempDir.getAbsolutePath());
     }
 
     @Test

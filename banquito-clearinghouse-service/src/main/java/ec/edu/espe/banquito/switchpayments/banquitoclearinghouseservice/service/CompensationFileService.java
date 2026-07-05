@@ -39,18 +39,18 @@ public class CompensationFileService {
 
     private final OffUsPaymentRepository offUsPaymentRepository;
     private final CompensationFileRepository compensationFileRepository;
-    private final AccountingService accountingService;
+    private final CoreSettlementService coreSettlementService;
     private final String outputDir;
 
     public CompensationFileService(
             OffUsPaymentRepository offUsPaymentRepository,
             CompensationFileRepository compensationFileRepository,
-            AccountingService accountingService,
+            CoreSettlementService coreSettlementService,
             @Value("${compensation.output.dir:}") String outputDir) {
 
         this.offUsPaymentRepository = offUsPaymentRepository;
         this.compensationFileRepository = compensationFileRepository;
-        this.accountingService = accountingService;
+        this.coreSettlementService = coreSettlementService;
         this.outputDir = outputDir != null ? outputDir.trim() : "";
     }
 
@@ -423,7 +423,7 @@ public class CompensationFileService {
 
     private void callAccountingService(UUID batchId, BigDecimal total) {
         try {
-            accountingService.registerOffUsAccountingEntry(batchId, total);
+            coreSettlementService.registerOffUsSettlement(batchId, total);
         } catch (Exception ex) {
             throw new AccountingIntegrationException(
                     "Error registrando asiento contable: " + ex.getMessage(),
