@@ -5,7 +5,6 @@ import ec.edu.espe.banquito.switchpayments.banquitoclearinghouseservice.dto.OffU
 import ec.edu.espe.banquito.switchpayments.banquitoclearinghouseservice.exception.BatchNotFoundException;
 import ec.edu.espe.banquito.switchpayments.banquitoclearinghouseservice.model.CompensationFile;
 import ec.edu.espe.banquito.switchpayments.banquitoclearinghouseservice.repository.CompensationFileRepository;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -19,7 +18,6 @@ public class ClearingQueryService {
         this.compensationFileRepository = compensationFileRepository;
     }
 
-    @RabbitListener(queues = "clearing-query-queue")
     public void consume(OffUsPaymentMessage message){
         offUsConsumerService.process(message);
     }
