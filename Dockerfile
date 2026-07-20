@@ -1,7 +1,9 @@
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:21-jre
 WORKDIR /app
 
-RUN addgroup -S spring && adduser -S spring -G spring
+ENV JAVA_TOOL_OPTIONS="-Dio.netty.handler.ssl.noOpenSsl=true"
+
+RUN groupadd --system spring && useradd --system --gid spring spring
 
 COPY --chown=spring:spring banquito-clearinghouse-service/target/*.jar app.jar
 
